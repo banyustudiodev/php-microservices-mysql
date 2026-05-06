@@ -27,3 +27,11 @@ php-microservices-mysql/
 | user-service    | Mengelola data user                     |
 | product-service | Mengelola data produk                   |
 | order-service   | Mengelola data pesanan                  |
+
+4- Pembuatan Database
+Masuk ke phpMyAdmin atau MySQL terminal.
+Buat tiga database berikut:
+
+CREATE DATABASE db_user_service;
+CREATE DATABASE db_product_service;
+CREATE DATABASE db_order_service;
