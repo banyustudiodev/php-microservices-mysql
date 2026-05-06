@@ -35,3 +35,26 @@ Buat tiga database berikut:
 CREATE DATABASE db_user_service;
 CREATE DATABASE db_product_service;
 CREATE DATABASE db_order_service;
+
+Pembuatan Tabel User Service
+Gunakan database db_user_service.
+
+USE db_user_service;
+
+Buat tabel users.
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+Masukkan data awal.
+
+INSERT INTO users (name, email) VALUES
+('Budi Santoso', 'budi@example.com'),
+('Siti Aminah', 'siti@example.com');
+
+Cek data:
+SELECT * FROM users;
