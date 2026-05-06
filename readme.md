@@ -881,3 +881,181 @@ http_response_code(404);
 echo json_encode([
     "message" => "Endpoint API Gateway tidak ditemukan"
 ]);
+
+15 - Menjalankan Semua Service
+Buka empat terminal berbeda. Lebih mudah pakai terminal tab di VS Code
+
+localhost:8000
+localhost:8001
+localhost:8002
+localhost:8003
+
+16 - Daftar Endpoint Melalui API Gateway
+
+Skenario Pengujian Praktikum
+1. Menampilkan Semua User
+
+Method:
+
+GET
+
+URL:
+
+http://localhost:8000/users
+
+Hasil yang diharapkan:
+
+{
+  "service": "User Service",
+  "data": [
+    {
+      "id": 1,
+      "name": "Budi Santoso",
+      "email": "budi@example.com",
+      "created_at": "2026-05-06 10:00:00"
+    }
+  ]
+}
+2. Menambahkan User
+
+Method:
+
+POST
+
+URL:
+
+http://localhost:8000/users
+
+Body:
+
+{
+  "name": "Rina Maharani",
+  "email": "rina@example.com"
+}
+
+Hasil yang diharapkan:
+
+{
+  "message": "User berhasil dibuat",
+  "data": {
+    "id": 3,
+    "name": "Rina Maharani",
+    "email": "rina@example.com"
+  }
+}
+3. Menampilkan Semua Produk
+
+Method:
+
+GET
+
+URL:
+
+http://localhost:8000/products
+4. Menambahkan Produk
+
+Method:
+
+POST
+
+URL:
+
+http://localhost:8000/products
+
+Body:
+
+{
+  "name": "Webcam 4K",
+  "price": 950000,
+  "stock": 8
+}
+5. Membuat Order
+
+Method:
+
+POST
+
+URL:
+
+http://localhost:8000/orders
+
+Body:
+
+{
+  "user_id": 1,
+  "product_id": 1,
+  "quantity": 2
+}
+
+Hasil yang diharapkan:
+
+{
+  "message": "Order berhasil dibuat",
+  "data": {
+    "id": 3,
+    "user": {
+      "id": 1,
+      "name": "Budi Santoso",
+      "email": "budi@example.com"
+    },
+    "product": {
+      "id": 1,
+      "name": "Laptop Lenovo ThinkPad",
+      "price": 8500000,
+      "stock": 10
+    },
+    "quantity": 2,
+    "status": "PENDING"
+  }
+}
+
+Setelah order dibuat, stok produk harus berkurang.
+
+6. Melihat Detail Order
+
+Method:
+
+GET
+
+URL:
+
+http://localhost:8000/orders/detail?id=1
+
+Hasil yang diharapkan adalah data order, data user, dan data produk.
+
+7. Mengubah Status Order
+
+Method:
+
+POST
+
+URL:
+
+http://localhost:8000/orders/update-status
+
+Body:
+
+{
+  "order_id": 1,
+  "status": "PAID"
+}
+8. Mengecek Status Service
+
+Method:
+
+GET
+
+URL:
+
+http://localhost:8000/status
+
+Hasil yang diharapkan:
+
+{
+  "service": "API Gateway",
+  "status": {
+    "user_service": "running",
+    "product_service": "running",
+    "order_service": "running"
+  }
+}
