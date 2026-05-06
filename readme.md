@@ -1,47 +1,90 @@
-1 - Buat folder utama dengan nama:
-php-microservices-mysql
+# PHP Microservices MySQL
 
-2 - Kemudian buat struktur folder seperti berikut:
+Proyek ini merupakan contoh praktikum sederhana untuk memahami arsitektur **microservices** menggunakan **PHP Native**, **MySQL**, dan **API Gateway**. Sistem terdiri dari tiga service utama, yaitu User Service, Product Service, dan Order Service. Setiap service menggunakan database sendiri agar prinsip pemisahan tanggung jawab pada microservices dapat terlihat dengan jelas.
 
+## Tujuan Praktikum
+
+Setelah menyelesaikan praktikum ini, mahasiswa diharapkan mampu:
+
+1. Memahami konsep dasar microservices.
+2. Membuat beberapa service sederhana menggunakan PHP Native.
+3. Menghubungkan setiap service dengan database MySQL yang berbeda.
+4. Membuat API Gateway sebagai pintu masuk utama client.
+5. Menguji komunikasi antarservice menggunakan browser, Thunder Client, Postman, atau tools sejenis.
+
+## Teknologi yang Digunakan
+
+| Teknologi | Fungsi |
+|---|---|
+| PHP Native | Membuat service REST API sederhana |
+| MySQL | Menyimpan data setiap service |
+| XAMPP | Menjalankan PHP dan MySQL secara lokal |
+| PDO | Menghubungkan PHP dengan database MySQL |
+| Thunder Client/Postman | Menguji endpoint API |
+
+## Arsitektur Sistem
+
+```text
+Client
+  |
+  v
+API Gateway : localhost:8000
+  |
+  |-- User Service    : localhost:8001 -> db_user_service
+  |-- Product Service : localhost:8002 -> db_product_service
+  |-- Order Service   : localhost:8003 -> db_order_service
+```
+
+API Gateway menjadi pintu masuk utama bagi client. Client tidak perlu mengakses setiap service secara langsung. Request dari client diterima oleh API Gateway, kemudian diteruskan ke service yang sesuai.
+
+## Struktur Folder
+
+Buat folder utama dengan nama `php-microservices-mysql`, kemudian buat struktur folder berikut.
+
+```text
 php-microservices-mysql/
-│
+|
 ├── api-gateway/
 │   └── index.php
-│
+|
 ├── user-service/
 │   ├── db.php
 │   └── index.php
-│
+|
 ├── product-service/
 │   ├── db.php
 │   └── index.php
-│
+|
 └── order-service/
     ├── db.php
     └── index.php
+```
 
-3 - Penjelasan struktur:
-| Folder          | Keterangan                              |
-| --------------- | --------------------------------------- |
-| api-gateway     | Mengatur request dari client ke service |
-| user-service    | Mengelola data user                     |
-| product-service | Mengelola data produk                   |
-| order-service   | Mengelola data pesanan                  |
+## Penjelasan Struktur Folder
 
-4- Pembuatan Database
-Masuk ke phpMyAdmin atau MySQL terminal.
-Buat tiga database berikut:
+| Folder | Keterangan |
+|---|---|
+| `api-gateway` | Mengatur request dari client ke service |
+| `user-service` | Mengelola data user |
+| `product-service` | Mengelola data produk |
+| `order-service` | Mengelola data pesanan |
 
+## Persiapan Database
+
+Masuk ke **phpMyAdmin** atau **MySQL terminal**, kemudian buat tiga database berikut.
+
+```sql
 CREATE DATABASE db_user_service;
 CREATE DATABASE db_product_service;
 CREATE DATABASE db_order_service;
+```
 
-5- Pembuatan Tabel User Service
-Gunakan database db_user_service.
+## Membuat Tabel User Service
 
+Gunakan database `db_user_service`.
+
+```sql
 USE db_user_service;
-
-Buat tabel users.
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,21 +93,19 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-Masukkan data awal.
-
 INSERT INTO users (name, email) VALUES
 ('Budi Santoso', 'budi@example.com'),
 ('Siti Aminah', 'siti@example.com');
 
-Cek data:
 SELECT * FROM users;
+```
 
-6 - Pembuatan Tabel Product Service
+## Membuat Tabel Product Service
 
-Gunakan database db_product_service.
+Gunakan database `db_product_service`.
+
+```sql
 USE db_product_service;
-
-Buat tabel products.
 
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,20 +115,20 @@ CREATE TABLE products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-Masukkan data awal.
-
 INSERT INTO products (name, price, stock) VALUES
 ('Laptop Lenovo ThinkPad', 8500000, 10),
 ('Mouse Wireless Logitech', 175000, 50),
 ('Keyboard Mechanical', 450000, 25);
 
-7 - Pembuatan Tabel Order Service
+SELECT * FROM products;
+```
 
-Gunakan database db_order_service.
+## Membuat Tabel Order Service
 
+Gunakan database `db_order_service`.
+
+```sql
 USE db_order_service;
-
-Buat tabel orders.
 
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -98,24 +139,20 @@ CREATE TABLE orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-Masukkan data awal.
-
 INSERT INTO orders (user_id, product_id, quantity, status) VALUES
 (1, 1, 1, 'PAID'),
 (2, 3, 2, 'PENDING');
 
-Cek data:
-
 SELECT * FROM orders;
+```
 
-Catatan penting:
+> Catatan: Pada arsitektur microservices, tabel `orders` tidak menggunakan foreign key langsung ke tabel `users` atau `products`, karena tabel tersebut berada pada database service lain. Order Service hanya menyimpan `user_id` dan `product_id` sebagai referensi.
 
-Pada microservices, tabel orders tidak menggunakan foreign key langsung ke tabel users atau products, karena tabel tersebut berada pada database service lain. Order Service hanya menyimpan user_id dan product_id sebagai referensi.
+# User Service
 
-8 -  Membuat User Service
+## File `user-service/db.php`
 
-file kode untuk: user-service/db.php
-
+```php
 <?php
 
 $host = "localhost";
@@ -140,9 +177,11 @@ try {
     ]);
     exit;
 }
+```
 
-file kode untuk : user-service/index.php
+## File `user-service/index.php`
 
+```php
 <?php
 
 header("Content-Type: application/json");
@@ -226,32 +265,39 @@ http_response_code(404);
 echo json_encode([
     "message" => "Endpoint User Service tidak ditemukan"
 ]);
+```
 
-9 - Jalankan userservices pada Terminal 
+## Menjalankan User Service
 
+Jalankan perintah berikut pada terminal.
+
+```bash
 cd user-service
 /Applications/XAMPP/xamppfiles/bin/php -S localhost:8001
+```
 
+## Uji User Service
 
-Uji melalui browser atau Thunder Client:
+```http
 GET http://localhost:8001/users
 GET http://localhost:8001/users/detail?id=1
-
-Contoh pengujian POST:
 POST http://localhost:8001/users
+```
 
-Body JSON:
+Body JSON untuk menambahkan user.
+
+```json
 {
   "name": "Andi Pratama",
   "email": "andi@example.com"
 }
+```
 
-10 - Membuat Product Service
+# Product Service
 
-edit product-service/db.php
+## File `product-service/db.php`
 
-Isi kode berikut:
-
+```php
 <?php
 
 $host = "localhost";
@@ -276,11 +322,11 @@ try {
     ]);
     exit;
 }
+```
 
-edit product-service/index.php
+## File `product-service/index.php`
 
-Isi kode berikut:
-
+```php
 <?php
 
 header("Content-Type: application/json");
@@ -416,47 +462,50 @@ http_response_code(404);
 echo json_encode([
     "message" => "Endpoint Product Service tidak ditemukan"
 ]);
+```
 
-11 - Menjalankan Product Service
+## Menjalankan Product Service
 
-Pada terminal
+```bash
 cd product-service
 /Applications/XAMPP/xamppfiles/bin/php -S localhost:8002
+```
 
-Uji endpoint:
+## Uji Product Service
 
+```http
 GET http://localhost:8002/products
 GET http://localhost:8002/products/detail?id=1
 POST http://localhost:8002/products
+POST http://localhost:8002/products/reduce-stock
+```
 
-Body JSON:
+Body JSON untuk menambahkan produk.
 
+```json
 {
   "name": "Monitor 24 Inch",
   "price": 1600000,
   "stock": 12
 }
+```
 
-Uji pengurangan stok:
+Body JSON untuk mengurangi stok.
 
-POST http://localhost:8002/products/reduce-stock
-
-Body JSON:
-
+```json
 {
   "product_id": 1,
   "quantity": 2
 }
+```
 
-12 - Membuat Order Service
-Order Service akan memvalidasi user dan produk melalui API.
+# Order Service
 
-Artinya, Order Service tidak membaca langsung db_user_service atau db_product_service.
+Order Service memvalidasi user dan produk melalui API. Order Service tidak membaca langsung database `db_user_service` atau `db_product_service`.
 
-ubah file order-service/db.php
+## File `order-service/db.php`
 
-Isi kode berikut:
-
+```php
 <?php
 
 $host = "localhost";
@@ -481,11 +530,11 @@ try {
     ]);
     exit;
 }
+```
 
-update order-service/index.php
+## File `order-service/index.php`
 
-Isi kode berikut:
-
+```php
 <?php
 
 header("Content-Type: application/json");
@@ -705,52 +754,50 @@ http_response_code(404);
 echo json_encode([
     "message" => "Endpoint Order Service tidak ditemukan"
 ]);
+```
 
-13 - Menjalankan Order Service
+## Menjalankan Order Service
 
+```bash
 cd order-service
 /Applications/XAMPP/xamppfiles/bin/php -S localhost:8003
+```
 
-Uji endpoint:
+## Uji Order Service
 
+```http
 GET http://localhost:8003/orders
 GET http://localhost:8003/orders/detail?id=1
 POST http://localhost:8003/orders
+POST http://localhost:8003/orders/update-status
+```
 
-Body JSON:
+Body JSON untuk membuat order.
 
+```json
 {
   "user_id": 1,
   "product_id": 1,
   "quantity": 2
 }
+```
 
-Uji update status:
+Body JSON untuk mengubah status order.
 
-POST http://localhost:8003/orders/update-status
-
-Body JSON:
-
+```json
 {
   "order_id": 1,
   "status": "PAID"
 }
+```
 
-14 - Membuat API Gateway
-API Gateway adalah pintu masuk utama bagi client.
+# API Gateway
 
-Client cukup mengakses:
+API Gateway adalah pintu masuk utama bagi client. Client cukup mengakses `http://localhost:8000`, kemudian API Gateway meneruskan request ke service yang sesuai.
 
-http://localhost:8000
+## File `api-gateway/index.php`
 
-Kemudian API Gateway meneruskan request ke service yang sesuai.
-
-Ubah file:
-
-api-gateway/index.php
-
-Isi kode berikut:
-
+```php
 <?php
 
 header("Content-Type: application/json");
@@ -881,30 +928,75 @@ http_response_code(404);
 echo json_encode([
     "message" => "Endpoint API Gateway tidak ditemukan"
 ]);
+```
 
-15 - Menjalankan Semua Service
-Buka empat terminal berbeda. Lebih mudah pakai terminal tab di VS Code
+## Menjalankan API Gateway
 
-localhost:8000
-localhost:8001
-localhost:8002
-localhost:8003
+```bash
+cd api-gateway
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8000
+```
 
-16 - Daftar Endpoint Melalui API Gateway
+# Menjalankan Semua Service
 
-Skenario Pengujian Praktikum
-1. Menampilkan Semua User
+Buka empat terminal berbeda. Terminal dapat dibuka melalui tab terminal di VS Code.
 
-Method:
+## Terminal 1: API Gateway
 
-GET
+```bash
+cd api-gateway
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8000
+```
 
-URL:
+## Terminal 2: User Service
 
-http://localhost:8000/users
+```bash
+cd user-service
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8001
+```
 
-Hasil yang diharapkan:
+## Terminal 3: Product Service
 
+```bash
+cd product-service
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8002
+```
+
+## Terminal 4: Order Service
+
+```bash
+cd order-service
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8003
+```
+
+# Daftar Endpoint Melalui API Gateway
+
+| No | Method | Endpoint | Fungsi |
+|---:|---|---|---|
+| 1 | GET | `http://localhost:8000/users` | Menampilkan semua user |
+| 2 | GET | `http://localhost:8000/users/detail?id=1` | Menampilkan detail user |
+| 3 | POST | `http://localhost:8000/users` | Menambahkan user |
+| 4 | GET | `http://localhost:8000/products` | Menampilkan semua produk |
+| 5 | GET | `http://localhost:8000/products/detail?id=1` | Menampilkan detail produk |
+| 6 | POST | `http://localhost:8000/products` | Menambahkan produk |
+| 7 | GET | `http://localhost:8000/orders` | Menampilkan semua order |
+| 8 | GET | `http://localhost:8000/orders/detail?id=1` | Menampilkan detail order |
+| 9 | POST | `http://localhost:8000/orders` | Membuat order |
+| 10 | POST | `http://localhost:8000/orders/update-status` | Mengubah status order |
+| 11 | GET | `http://localhost:8000/summary` | Menampilkan ringkasan data |
+| 12 | GET | `http://localhost:8000/status` | Mengecek status service |
+
+# Skenario Pengujian Praktikum
+
+## 1. Menampilkan Semua User
+
+```http
+GET http://localhost:8000/users
+```
+
+Contoh hasil yang diharapkan.
+
+```json
 {
   "service": "User Service",
   "data": [
@@ -916,25 +1008,26 @@ Hasil yang diharapkan:
     }
   ]
 }
-2. Menambahkan User
+```
 
-Method:
+## 2. Menambahkan User
 
-POST
+```http
+POST http://localhost:8000/users
+```
 
-URL:
+Body JSON.
 
-http://localhost:8000/users
-
-Body:
-
+```json
 {
   "name": "Rina Maharani",
   "email": "rina@example.com"
 }
+```
 
-Hasil yang diharapkan:
+Contoh hasil yang diharapkan.
 
+```json
 {
   "message": "User berhasil dibuat",
   "data": {
@@ -943,52 +1036,49 @@ Hasil yang diharapkan:
     "email": "rina@example.com"
   }
 }
-3. Menampilkan Semua Produk
+```
 
-Method:
+## 3. Menampilkan Semua Produk
 
-GET
+```http
+GET http://localhost:8000/products
+```
 
-URL:
+## 4. Menambahkan Produk
 
-http://localhost:8000/products
-4. Menambahkan Produk
+```http
+POST http://localhost:8000/products
+```
 
-Method:
+Body JSON.
 
-POST
-
-URL:
-
-http://localhost:8000/products
-
-Body:
-
+```json
 {
   "name": "Webcam 4K",
   "price": 950000,
   "stock": 8
 }
-5. Membuat Order
+```
 
-Method:
+## 5. Membuat Order
 
-POST
+```http
+POST http://localhost:8000/orders
+```
 
-URL:
+Body JSON.
 
-http://localhost:8000/orders
-
-Body:
-
+```json
 {
   "user_id": 1,
   "product_id": 1,
   "quantity": 2
 }
+```
 
-Hasil yang diharapkan:
+Contoh hasil yang diharapkan.
 
+```json
 {
   "message": "Order berhasil dibuat",
   "data": {
@@ -1008,49 +1098,42 @@ Hasil yang diharapkan:
     "status": "PENDING"
   }
 }
+```
 
 Setelah order dibuat, stok produk harus berkurang.
 
-6. Melihat Detail Order
+## 6. Melihat Detail Order
 
-Method:
-
-GET
-
-URL:
-
-http://localhost:8000/orders/detail?id=1
+```http
+GET http://localhost:8000/orders/detail?id=1
+```
 
 Hasil yang diharapkan adalah data order, data user, dan data produk.
 
-7. Mengubah Status Order
+## 7. Mengubah Status Order
 
-Method:
+```http
+POST http://localhost:8000/orders/update-status
+```
 
-POST
+Body JSON.
 
-URL:
-
-http://localhost:8000/orders/update-status
-
-Body:
-
+```json
 {
   "order_id": 1,
   "status": "PAID"
 }
-8. Mengecek Status Service
+```
 
-Method:
+## 8. Mengecek Status Service
 
-GET
+```http
+GET http://localhost:8000/status
+```
 
-URL:
+Contoh hasil yang diharapkan.
 
-http://localhost:8000/status
-
-Hasil yang diharapkan:
-
+```json
 {
   "service": "API Gateway",
   "status": {
@@ -1059,3 +1142,20 @@ Hasil yang diharapkan:
     "order_service": "running"
   }
 }
+```
+
+# Catatan Penting
+
+1. Pastikan MySQL pada XAMPP sudah berjalan sebelum menjalankan service.
+2. Pastikan setiap service berjalan pada port yang berbeda.
+3. Jalankan service melalui path folder masing-masing.
+4. API Gateway harus dijalankan jika pengujian dilakukan melalui `localhost:8000`.
+5. Jika terminal menampilkan pesan `command not found: php`, gunakan path PHP dari XAMPP berikut.
+
+```bash
+/Applications/XAMPP/xamppfiles/bin/php
+```
+
+# Kesimpulan
+
+Praktikum ini menunjukkan bahwa microservices memisahkan tanggung jawab sistem ke dalam beberapa service kecil. User Service bertanggung jawab terhadap data user. Product Service bertanggung jawab terhadap data produk. Order Service bertanggung jawab terhadap data pesanan. API Gateway bertindak sebagai pintu masuk utama yang meneruskan request client ke service yang sesuai.
